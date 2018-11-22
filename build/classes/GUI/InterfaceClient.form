@@ -134,6 +134,9 @@
           </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="text_error">
+          <Events>
+            <EventHandler event="ancestorAdded" listener="javax.swing.event.AncestorListener" parameters="javax.swing.event.AncestorEvent" handler="text_errorAncestorAdded"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

@@ -1,83 +1,92 @@
 package DAL;
 
+/**
+ * Classe qui contient les attributs et les getters setters correspondant aux
+ * champs dans la table client
+ *
+ * @author 80010-37-15
+ */
 public class Client {
 
-    // Attributs correspondant à mes champs dans la base de données de la table client
     private int Id;
     private String Nom;
     private String Prenom;
     private String Ville;
 
     /**
-     * Lis l'identifiant du client
+     * Getter correspondant à l'attribut privé -> Id
      *
-     * @return
+     * @return Id - Retourne l'identifiant du client
      */
     public int getId() {
         return Id;
     }
 
     /**
-     * Récupère l'identifiant du client
+     * Setter correspondant à l'attribut privé -> Id
      *
-     * @param Id
+     * @param Id Défini l'identifiant du client
      */
     public void setId(int Id) {
         this.Id = Id;
     }
 
     /**
-     * Lis le nom du client
+     * Getter correspondant à l'attribut privé -> Nom
      *
-     * @return
+     * @return Nom - Retourne le nom du client
      */
     public String getNom() {
         return Nom;
     }
 
     /**
-     * Récupère le nom du client
+     * Setter correspondant à l'attribut privé -> Nom
      *
-     * @param Nom
+     * @param Nom Défini le nom du client
      */
     public void setNom(String Nom) {
         this.Nom = Nom;
     }
 
     /**
-     * Lis le prénom du client
+     * Getter correspondant à l'attribut privé -> Prenom
      *
-     * @return
+     * @return Prenom - Retourne le prénom du client
      */
     public String getPrenom() {
         return Prenom;
     }
 
     /**
-     * Récupère le prénom du client
+     * Setter correspondant à l'attribut privé -> Prenom
      *
-     * @param Prenom
+     * @param Prenom Défini le prénom du client
      */
     public void setPrenom(String Prenom) {
         this.Prenom = Prenom;
     }
 
     /**
-     * Lis la ville du client
+     * Getter correspondant à l'attribut privé -> Ville
      *
-     * @return
+     * @return Ville - Retourne la ville du client
      */
     public String getVille() {
         return Ville;
     }
 
     /**
-     * Récupère la ville du client
+     * Setter correspondant à l'attribut privé -> Ville
      *
-     * @param Ville
+     * @param Ville Défini la ville du client
      */
     public void setVille(String Ville) {
         this.Ville = Ville;
+    }
+
+    public int size() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

@@ -6,30 +6,32 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
+/**
+ * Modele qui me permet de gerer la jTable pour le jFrame
+ *
+ * @author 80010-37-15
+ */
 public class jTable extends AbstractTableModel {
 
     // Entête du tableau qui ne peut être modifié(final) même dans la classe(private) 
     private final String[] Titres = {"NOM", "PRENOM", "VILLE"};
-    // Instance d'une classe et d'une liste
     ClientDAO clients = new ClientDAO();
     List<Client> clients_list = new ArrayList();
 
     /**
-     * Liste qui contiendra les données du clients (une autre liste) récupérer
-     * grâce à la méthode List() qui retourne toutes les données de la table
-     * client
+     * Méthode qui récupère la liste qui a été retourné dans la méthode
+     * {@code Insert()} de la classe {@code ClientDAO()}
      *
-     * @Constructeur
+     * @Construct
      */
     public jTable() {
-        clients_list = clients.List();
+        clients_list = clients.Read();
     }
 
     /**
-     * Retourne le nombres de colonnes 3 titres : 3 colonnes | 4 titres : 4
-     * colonnes
+     * Retourne le nombres de colonnes suivant le nombres de titres
      *
-     * @return
+     * @return - Retourne le nombre de titre
      */
     @Override
     public int getColumnCount() {
@@ -37,10 +39,10 @@ public class jTable extends AbstractTableModel {
     }
 
     /**
-     * Retourne les titres dans les colonnes du jTable
+     * Méthode qui me permet de placer les titres dans les colonnes du jTable
      *
-     * @param column
-     * @return
+     * @param column Défini le nombre de colonne
+     * @return - Retourne les titres dans les colonnes
      */
     @Override
     public String getColumnName(int column) {
@@ -48,9 +50,9 @@ public class jTable extends AbstractTableModel {
     }
 
     /**
-     * Retourne le nombre de ligne dans la liste
+     * Méthode qui me permet de connaitre le nombre de ligne dans la liste
      *
-     * @return
+     * @return Retourne la taille de la liste
      */
     @Override
     public int getRowCount() {
@@ -58,12 +60,12 @@ public class jTable extends AbstractTableModel {
     }
 
     /**
-     * Pour chaque colonne (row), affiche les noms, prénoms et villes les
-     * données viennent de la liste des clients récupéré dans la base de données
+     * Méthode qui permet d'afficher les clients de la base de données dans le
+     * jTable
      *
-     * @param row
-     * @param column
-     * @return
+     * @param row Est le nombre de ligne
+     * @param column Est le nombre de colonne
+     * @return Retourne les N,P,V des clients dans les colonnes
      */
     @Override
     public Object getValueAt(int row, int column) {
@@ -80,33 +82,32 @@ public class jTable extends AbstractTableModel {
     }
 
     /**
-     * Ajoute une ligne dans le jTable (client : données à insérer) je récupère
-     * les données du client avec les ** client.setters() AND jtable.getText()
+     * Ajoute une ligne dans le jTable
      *
-     **
-     * @param client
+     * @param client Contient les données du client
      */
     public void AjouteClient(Client client) {
         clients_list.add(client);
-        fireTableRowsInserted(clients_list.size() + 1, clients_list.size());
+        fireTableRowsInserted(clients_list.size()-1, clients_list.size());
     }
 
     /**
-     * Supprime une ligne dans le jTable et dans la liste (i : la ligne à
-     * supprimer) je récupère la ligne sélectionnée avec ** getSelectedRow()
+     * Supprime une ligne dans le jTable
      *
-     **
-     * @param i
+     * @param i Contient le numéro de la ligne à supprimer
      */
     public void SupprimerClient(int i) {
         clients_list.remove(i);
+        // Supprime une ligne (Nul besoin de la fonction Actualise()
         fireTableRowsDeleted(i, i);
     }
 
     /**
-     * Permet d'actualiser la liste de client
+     * Actualise la liste de la jTable, en réassignant la liste retourné de la
+     * méthode {@code Insert()} de la classe {@code ClientDAO()} dans la
+     * nouvelle liste
      */
     public void Actualise() {
-        clients_list = clients.List();
+        clients_list = clients.Read();
     }
 }

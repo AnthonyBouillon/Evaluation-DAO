@@ -3,14 +3,23 @@ package DAL;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * Classe utilisée pour la gestion d'un ou de plusieurs clients | Méthode
+ * contenu -> CREATE READ UPDATE DELETE (CRUD)
+ *
+ * @author 80010-37-15
+ */
 public class ClientDAO extends Connexion {
 
+    public String message = "";
+    public boolean validate_method = false;
+
     /**
-     * Insertion d'un client (nom, prénom et ville) dans la table client
+     * Insertion d'un client (nom, prénom et ville) dans la bdd
      *
-     * @param cli
+     * @param cli Contient toutes les données pour un client
      */
-    public void Insert(Client cli) {
+    public void Create(Client cli) {
         try {
             PreparedStatement stm = Connection().prepareStatement("INSERT INTO client (cli_nom, cli_prenom, cli_ville) VALUES (?, ?, ?)");
             stm.setString(1, cli.getNom());
@@ -18,16 +27,18 @@ public class ClientDAO extends Connexion {
             stm.setString(3, cli.getVille());
             stm.execute();
             Connection().close();
+            message = "Client ajouté avec succès";
         } catch (SQLException e) {
+            message = "Désolé, le client n'a pas pu être ajouté";
             System.out.println("Error while inserting entity 'client'");
             System.out.println(e.getMessage());
         }
     }
 
     /**
-     * Modifie les informations d'un client besoin de l'id et d'une autre valeur
+     * Modifie les informations (nom, prénom et ville) d'un client dans la bdd
      *
-     * @param cli
+     * @param cli Contient toutes les nouvelles données pour un client
      */
     public void Update(Client cli) {
         try {
@@ -38,16 +49,21 @@ public class ClientDAO extends Connexion {
             stm.setString(3, cli.getVille());
             stm.execute();
             Connection().close();
+            message = "Client modifié avec succès";
+            validate_method = true;
         } catch (SQLException e) {
+            validate_method = false;
+            message = "Désolé, le client n'a pas pu être modifié";
             System.out.println("Error update entity 'client'");
             System.out.println(e.getMessage());
         }
     }
 
     /**
-     * Supprime un client (d'abord dans réservation et ensuite dans client | clé étrangère) besoin de l'id
+     * Supprime un client (d'abord dans réservation et ensuite dans client | clé
+     * étrangère)
      *
-     * @param cli
+     * @param cli Contient l'identifiant du client à supprimer
      */
     public void Delete(Client cli) {
         try {
@@ -59,18 +75,21 @@ public class ClientDAO extends Connexion {
             stm.setInt(1, cli.getId());
             stm.execute();
             Connection().close();
+            message = "Client supprimé avec succès";
         } catch (SQLException e) {
+            message = "Désolé, le client n'a pas pu être supprimé";
             System.out.println("Error deleting entity 'client' or 'reservation'");
             System.out.println(e.getMessage());
         }
     }
 
     /**
-     * Liste contenant toutes les informations d'un client
+     * Liste contenant toutes les informations des clients de la base de données
      *
-     * @return
+     * @return - Retourne une liste contenant les informations de tout les
+     * clients
      */
-    public List<Client> List() {
+    public List<Client> Read() {
         List<Client> resultat = new ArrayList();
         try {
             Statement stm = Connection().createStatement();
@@ -88,6 +107,7 @@ public class ClientDAO extends Connexion {
             Connection().close();
         } catch (SQLException e) {
             System.out.println("Error reading 'client'");
+            message = null;
             System.out.println(e.getMessage());
         }
         return resultat;

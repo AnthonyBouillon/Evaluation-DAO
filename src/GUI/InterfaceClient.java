@@ -11,18 +11,22 @@ import java.awt.Color;
 import java.util.regex.Matcher;
 import javax.swing.BorderFactory;
 import java.util.regex.Pattern;
+import javax.swing.JOptionPane;
 
 /**
+ * Formulaire qui permet la gestion de 1 ou N client Ajouter, Modifier,
+ * Supprimer, Lire
  *
  * @author 80010-37-15
  */
 public class InterfaceClient extends javax.swing.JFrame {
 
+    // Défini si l'utilisateur veut ajouter ou modifier un client
     boolean add_button = false;
     // Instance de mes trois classes
     Client client = new Client();
     ClientDAO clients = new ClientDAO();
-    jTable jtable = new jTable();
+    jTable model_jtable = new jTable();
 
     /**
      * Creates new form InterfaceClient
@@ -31,8 +35,14 @@ public class InterfaceClient extends javax.swing.JFrame {
         initComponents();
         // Défini une taille à l'ouverture de l'application
         setSize(595, 550);
-        // Associe ma classe jTable avec le jTable de la classe InterfaceClient
-        List_client.setModel(jtable);
+        /*
+         * Affiche les clients dans le tableau.
+         * Affiche une erreur si il y a un problème avec la liste
+         */
+        List_client.setModel(model_jtable);
+        if (clients.message == null) {
+            JOptionPane.showMessageDialog(null, "Désolé, la liste des clients est indisponible");
+        }
     }
 
     /**
@@ -97,6 +107,16 @@ public class InterfaceClient extends javax.swing.JFrame {
         Update_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 Update_buttonActionPerformed(evt);
+            }
+        });
+
+        text_error.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
+                text_errorAncestorAdded(evt);
+            }
+            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
             }
         });
 
@@ -241,13 +261,13 @@ public class InterfaceClient extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void OK_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OK_buttonActionPerformed
+
         int cpt_error = 0;
-        // Expression régulière pour les champs du formulaire
-        String REGEX = "^[A-Za-z]+$";
-        Pattern PATTERN = Pattern.compile(REGEX);
-        Matcher match_n = PATTERN.matcher(name.getText());
-        Matcher match_f = PATTERN.matcher(firstname.getText());
-        Matcher match_c = PATTERN.matcher(city.getText());
+        // Expression régulière Alphabet + accent + espace + tiret + limite de 1 à 50
+        Pattern PATTERN = Pattern.compile("^[A-Za-záàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ-]+{1,50}$");
+        Matcher VALIDATE_NAME = PATTERN.matcher(name.getText());
+        Matcher VALIDATE_FIRSTNAME = PATTERN.matcher(firstname.getText());
+        Matcher VALIDATE_CITY = PATTERN.matcher(city.getText());
 
         // Si l'utilisateur à cliquer precedemment sur le bouton Ajouter / Sinon c'est le bouton modifier
         if (add_button == true) {
@@ -256,21 +276,21 @@ public class InterfaceClient extends javax.swing.JFrame {
              * Je récupère les valeurs des champs,
              * Sinon les bordures deviennent rouge
              */
-            if (!name.getText().equals("") && match_n.find()) {
+            if (VALIDATE_NAME.find()) {
                 client.setNom(name.getText());
                 name.setBorder(BorderFactory.createLineBorder(Color.gray));
             } else {
                 cpt_error++;
                 name.setBorder(BorderFactory.createLineBorder(Color.red));
             }
-            if (!firstname.getText().equals("") && match_f.find()) {
+            if (VALIDATE_FIRSTNAME.find()) {
                 client.setPrenom(firstname.getText());
                 firstname.setBorder(BorderFactory.createLineBorder(Color.gray));
             } else {
                 cpt_error++;
                 firstname.setBorder(BorderFactory.createLineBorder(Color.red));
             }
-            if (!city.getText().equals("") && match_c.find()) {
+            if (VALIDATE_CITY.find()) {
                 client.setVille(city.getText());
                 city.setBorder(BorderFactory.createLineBorder(Color.gray));
             } else {
@@ -282,35 +302,33 @@ public class InterfaceClient extends javax.swing.JFrame {
                  * Ajoute le client dans la base de données Ajoute le client
                  * dans la liste Actualise la liste
                  */
-                clients.Insert(client);
-                jtable.AjouteClient(client);
-                jtable.Actualise();
+                clients.Create(client);
+                model_jtable.AjouteClient(client);
+                model_jtable.Actualise();
                 // Puis, je vide les champs
-                name.setText("");
-                firstname.setText("");
-                city.setText("");
-
+                empty_field();
+                // Redefini la taille
                 setSize(595, 550);
                 add_button = false;
+                // Affiche message de succès
+                text_error.setText(clients.message);
             }
         } else {
-            // Je récupère l'id dans la ligne sélectionnée
-            client.setId(jtable.clients_list.get(num_ligne()).getId());
-            if (!name.getText().equals("")) {
+            if (VALIDATE_NAME.find()) {
                 client.setNom(name.getText());
                 name.setBorder(BorderFactory.createLineBorder(Color.gray));
             } else {
                 cpt_error++;
                 name.setBorder(BorderFactory.createLineBorder(Color.red));
             }
-            if (!firstname.getText().equals("")) {
+            if (VALIDATE_FIRSTNAME.find()) {
                 client.setPrenom(firstname.getText());
                 firstname.setBorder(BorderFactory.createLineBorder(Color.gray));
             } else {
                 cpt_error++;
                 firstname.setBorder(BorderFactory.createLineBorder(Color.red));
             }
-            if (!city.getText().equals("")) {
+            if (VALIDATE_CITY.find()) {
                 client.setVille(city.getText());
                 city.setBorder(BorderFactory.createLineBorder(Color.gray));
             } else {
@@ -318,23 +336,26 @@ public class InterfaceClient extends javax.swing.JFrame {
                 city.setBorder(BorderFactory.createLineBorder(Color.red));
             }
             if (cpt_error == 0) {
+                // Je récupère l'id dans la ligne sélectionnée
+                client.setId(model_jtable.clients_list.get(num_ligne()).getId());
                 /**
                  * Modifie les infos client dans la base de données Actualise la
                  * liste de client dans la jTable
                  */
                 clients.Update(client);
-                jtable.Actualise();
+                model_jtable.Actualise();
                 // Et, je vide les champs
-                name.setText("");
-                firstname.setText("");
-                city.setText("");
+                empty_field();
+                // Redefini la taille
                 setSize(595, 550);
+                // Affiche message de succès
+                text_error.setText(clients.message);
             }
-
         }
     }//GEN-LAST:event_OK_buttonActionPerformed
 
     private void Cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Cancel_buttonActionPerformed
+        text_error.setText("");
         /*
          * Definition de la taille
          * Vide les champs de texte
@@ -342,55 +363,73 @@ public class InterfaceClient extends javax.swing.JFrame {
          */
         setSize(595, 550);
         add_button = false;
-        name.setText("");
-        firstname.setText("");
-        city.setText("");
+        empty_field();
     }//GEN-LAST:event_Cancel_buttonActionPerformed
 
     private void Update_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Update_buttonActionPerformed
         add_button = false;
+        /**
+         * Affiche dans les champs les données du client sélectionné Si aucune
+         * ligne n'est sélectionné, affiche un message d'erreur
+         */
         if (num_ligne() != -1) {
             setSize(987, 550);
             text_error.setText("");
             // Affiche les informations du client dans les champs de texte
-            name.setText(jtable.clients_list.get(num_ligne()).getNom());
-            firstname.setText(jtable.clients_list.get(num_ligne()).getPrenom());
-            city.setText(jtable.clients_list.get(num_ligne()).getVille());
+            name.setText(model_jtable.clients_list.get(num_ligne()).getNom());
+            firstname.setText(model_jtable.clients_list.get(num_ligne()).getPrenom());
+            city.setText(model_jtable.clients_list.get(num_ligne()).getVille());
         } else {
-            text_error.setText("<html><marquee style='color:red'>Veuillez sélectionner un client <br/>avant de le modifier</marquee><hr/><center style='max-width: 10%;'><img src='https://s1.qwant.com/thumbr/0x0/8/0/72200c66d4f5f8505e2fd07b6300796fcf361232b24696275eaffd63d59502/desventajas.png?u=https%3A%2F%2Fdatadesk.es%2Fwp-content%2Fuploads%2F2015%2F08%2Fdesventajas.png&q=0&b=1&p=0&a=1' style='max-width: 10%;'></center></html>");
-            text_error.setForeground(Color.red);
+            text_error.setText("<html><marquee>Veuillez sélectionner un client <br/>avant de le modifier</marquee><hr/><center style='max-width: 10%;'><img src='https://s1.qwant.com/thumbr/0x0/8/0/72200c66d4f5f8505e2fd07b6300796fcf361232b24696275eaffd63d59502/desventajas.png?u=https%3A%2F%2Fdatadesk.es%2Fwp-content%2Fuploads%2F2015%2F08%2Fdesventajas.png&q=0&b=1&p=0&a=1' style='max-width: 10%;'></center></html>");
         }
     }//GEN-LAST:event_Update_buttonActionPerformed
 
     private void Add_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Add_buttonActionPerformed
-        /*
-         * Bouton Ajouter à true
-         * Définition de la taille
-         */
+        text_error.setText("");
         add_button = true;
         setSize(987, 550);
     }//GEN-LAST:event_Add_buttonActionPerformed
 
     private void Delete_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Delete_buttonActionPerformed
-        // 
-        if (num_ligne() != -1) {
-            text_error.setText("");
-        } else {
-            text_error.setText("<html><marquee style='color:red'>Veuillez sélectionner un client <br/>avant de le supprimer</marquee><hr/><center style='max-width: 10%;'><img src='https://s1.qwant.com/thumbr/0x0/8/0/72200c66d4f5f8505e2fd07b6300796fcf361232b24696275eaffd63d59502/desventajas.png?u=https%3A%2F%2Fdatadesk.es%2Fwp-content%2Fuploads%2F2015%2F08%2Fdesventajas.png&q=0&b=1&p=0&a=1' style='max-width: 10%;'></center></html>");
-
-        }
         add_button = false;
-
-        // Je récupère l'id de la ligne
-        client.setId(jtable.clients_list.get(num_ligne()).getId());
-        // Puis je supprime le client dans la base de donnée
-        clients.Delete(client);
-        // Et dans la liste
-        jtable.SupprimerClient(num_ligne());
+        /**
+         * Vérification de la ligne sélectionnée Récupération de l'identifiant
+         * du client Appelle de la méthode DELETE() pour supprimer le client
+         * dans la bdd Appelle de la méthode SupprimerClient() pour supprimer le
+         * client dans la liste
+         */
+        if (num_ligne() != -1) {
+            client.setId(model_jtable.clients_list.get(num_ligne()).getId());
+            clients.Delete(client);
+            model_jtable.SupprimerClient(num_ligne());
+            text_error.setText(clients.message);
+        } else {
+            text_error.setText("<html><marquee>Veuillez sélectionner un client <br/>avant de le supprimer</marquee><hr/><center style='max-width: 10%;'><img src='https://s1.qwant.com/thumbr/0x0/8/0/72200c66d4f5f8505e2fd07b6300796fcf361232b24696275eaffd63d59502/desventajas.png?u=https%3A%2F%2Fdatadesk.es%2Fwp-content%2Fuploads%2F2015%2F08%2Fdesventajas.png&q=0&b=1&p=0&a=1' style='max-width: 10%;'></center></html>");
+        }
     }//GEN-LAST:event_Delete_buttonActionPerformed
+
+    private void text_errorAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_text_errorAncestorAdded
+        text_error.setForeground(Color.blue);
+    }//GEN-LAST:event_text_errorAncestorAdded
+
+    /**
+     * Méthode qui me permet de connaitre la ligne que l'utilisateur à
+     * sélectionné
+     *
+     * @return la ligne sélectionnée
+     */
     public int num_ligne() {
         int ligne = List_client.getSelectedRow();
         return ligne;
+    }
+
+    /**
+     * Vide les champs de texte
+     */
+    public void empty_field() {
+        name.setText("");
+        firstname.setText("");
+        city.setText("");
     }
 
     /**

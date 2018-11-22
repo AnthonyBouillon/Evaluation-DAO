@@ -2,14 +2,19 @@ package DAL;
 
 import java.sql.*;
 
+/**
+ * Classe qui me permet de me connecter à la base de données (hotel)
+ * @author 80010-37-15
+ */
 public class Connexion {
 
     Connection con = null;
 
     /**
-     * Connexion à la base de données ** hotel
+     * Méthode contenant l'url de ma base de données ainsi que les identifiants
+     * de connexion
      *
-     * @return
+     * @return con - Objet de connexion
      */
     public Connection Connection() {
         try {
