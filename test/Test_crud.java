@@ -20,22 +20,30 @@ public class Test_crud {
     ClientDAO clients = new ClientDAO();
     Client cli = new Client();
 
-    // Test si la méthode Insert() fonctionne
+    /**
+     * Méthode qui me permet de tester la méthode {@code Create()} de la classe
+     * {@code ClientDAO()}.
+     */
     @Test
-    public void Create_test() {
+    public void Create_test() throws SQLException {
         boolean resultat_attendu = false;
         // Données que je veut inserer
         cli.setNom("Bouillon");
         cli.setPrenom("Anthony");
         cli.setVille("Corbie");
         clients.Create(cli);
+        // Vérifie si la dernière ligne de la base de données correspond au information insérer par l'utilisateur
         for (Client liste : clients.Read()) {
             resultat_attendu = cli.getNom().equals(liste.getNom()) && cli.getPrenom().equals(liste.getPrenom()) && cli.getVille().equals(liste.getVille());
         }
         assertTrue(resultat_attendu);
     }
 
-    // Test si la méthode Read() fonctionne
+    /**
+     * Méthode qui me permet de tester la méthode {@code Read()} de la classe
+     * {@code ClientDAO()}. Si la liste contient au moins une ligne, c'est que
+     * la liste contient des valeurs provenant de la base de données
+     */
     @Test
     public void Read_test() {
         boolean resultat_attendu = false;
@@ -46,8 +54,11 @@ public class Test_crud {
         }
         assertTrue(resultat_attendu);
     }
-// Test si la méthode Update() fonctionne
 
+    /**
+     * Méthode qui me permet de tester la méthode {@code Update()} de la classe
+     * {@code ClientDAO()}. Modifie les données d'un client (Nom, Prénom, Ville)
+     */
     @Test
     public void update_test() {
         boolean resultat_attendu = false;
@@ -60,7 +71,12 @@ public class Test_crud {
         assertTrue(resultat_attendu);
     }
 
-    // Test une erreur volontaire
+    /**
+     * On teste si la méthode {@code Update()} accepte de ne modifier qu'une
+     * données sans avoir les autres (le résultat attendu doit être faux)
+     *
+     * @return false
+     */
     @Test
     public void update_test_2() {
         boolean resultat_attendu = false;
@@ -70,7 +86,6 @@ public class Test_crud {
         resultat_attendu = clients.validate_method != false;
         assertFalse(resultat_attendu);
     }
-    // Test si la méthode Delete() fonctionne
 
     /**
      * Méthode Qui me permet de testé la méthode {@code Delete()} de la classe
@@ -80,11 +95,12 @@ public class Test_crud {
      */
     @Test
     public void Delete_test() throws SQLException {
+        // On part du principe que la requête marche
         boolean resultat_attendu = true;
         // Je demande la suppression de se client
         cli.setId(318);
         clients.Delete(cli);
-        // Je recherche les informations du client "supprimer"
+        // Je recherche les informations du client qui a été "supprimer"
         Statement stm = connection.Connection().createStatement();
         ResultSet result = stm.executeQuery("SELECT * FROM client WHERE cli_id = 318");
         // Si les informations du client existe encore -> la requête Delete() ne marche pas
@@ -97,4 +113,8 @@ public class Test_crud {
         assertTrue(resultat_attendu);
     }
 
+    @Test
+    public void Connection_test() {
+
+    }
 }

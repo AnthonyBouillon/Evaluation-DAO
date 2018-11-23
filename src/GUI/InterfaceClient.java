@@ -8,6 +8,9 @@ package GUI;
 import DAL.Client;
 import DAL.ClientDAO;
 import java.awt.Color;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import javax.swing.BorderFactory;
 import java.util.regex.Pattern;
@@ -21,6 +24,7 @@ import javax.swing.JOptionPane;
  */
 public class InterfaceClient extends javax.swing.JFrame {
 
+    String message = "";
     // Défini si l'utilisateur veut ajouter ou modifier un client
     boolean add_button = false;
     // Instance de mes trois classes
@@ -268,41 +272,44 @@ public class InterfaceClient extends javax.swing.JFrame {
         Matcher VALIDATE_NAME = PATTERN.matcher(name.getText());
         Matcher VALIDATE_FIRSTNAME = PATTERN.matcher(firstname.getText());
         Matcher VALIDATE_CITY = PATTERN.matcher(city.getText());
-
-        // Si l'utilisateur à cliquer precedemment sur le bouton Ajouter / Sinon c'est le bouton modifier
-        if (add_button == true) {
-            /*
+        /*
              * Si ce n'est pas vide et que la regex est respectée
              * Je récupère les valeurs des champs,
              * Sinon les bordures deviennent rouge
-             */
-            if (VALIDATE_NAME.find()) {
-                client.setNom(name.getText());
-                name.setBorder(BorderFactory.createLineBorder(Color.gray));
-            } else {
-                cpt_error++;
-                name.setBorder(BorderFactory.createLineBorder(Color.red));
-            }
-            if (VALIDATE_FIRSTNAME.find()) {
-                client.setPrenom(firstname.getText());
-                firstname.setBorder(BorderFactory.createLineBorder(Color.gray));
-            } else {
-                cpt_error++;
-                firstname.setBorder(BorderFactory.createLineBorder(Color.red));
-            }
-            if (VALIDATE_CITY.find()) {
-                client.setVille(city.getText());
-                city.setBorder(BorderFactory.createLineBorder(Color.gray));
-            } else {
-                cpt_error++;
-                city.setBorder(BorderFactory.createLineBorder(Color.red));
-            }
+         */
+        if (VALIDATE_NAME.find()) {
+            client.setNom(name.getText());
+            name.setBorder(BorderFactory.createLineBorder(Color.gray));
+        } else {
+            cpt_error++;
+            name.setBorder(BorderFactory.createLineBorder(Color.red));
+        }
+        if (VALIDATE_FIRSTNAME.find()) {
+            client.setPrenom(firstname.getText());
+            firstname.setBorder(BorderFactory.createLineBorder(Color.gray));
+        } else {
+            cpt_error++;
+            firstname.setBorder(BorderFactory.createLineBorder(Color.red));
+        }
+        if (VALIDATE_CITY.find()) {
+            client.setVille(city.getText());
+            city.setBorder(BorderFactory.createLineBorder(Color.gray));
+        } else {
+            cpt_error++;
+            city.setBorder(BorderFactory.createLineBorder(Color.red));
+        }
+        // Si l'utilisateur à cliquer precedemment sur le bouton Ajouter / Sinon c'est le bouton modifier
+        if (add_button == true) {
             if (cpt_error == 0) {
-                /**
-                 * Ajoute le client dans la base de données Ajoute le client
-                 * dans la liste Actualise la liste
-                 */
-                clients.Create(client);
+                try {
+                    clients.Create(client);
+                    message = "Client ajouté avec succès";
+                    text_error.setText(message);
+                } catch (SQLException ex) {
+                    ex.getErrorCode();
+                    message = "Désolé, le client n'a pas pu être ajouté";
+                    text_error.setText(message);
+                }
                 model_jtable.AjouteClient(client);
                 model_jtable.Actualise();
                 // Puis, je vide les champs
@@ -311,30 +318,9 @@ public class InterfaceClient extends javax.swing.JFrame {
                 setSize(595, 550);
                 add_button = false;
                 // Affiche message de succès
-                text_error.setText(clients.message);
+               
             }
         } else {
-            if (VALIDATE_NAME.find()) {
-                client.setNom(name.getText());
-                name.setBorder(BorderFactory.createLineBorder(Color.gray));
-            } else {
-                cpt_error++;
-                name.setBorder(BorderFactory.createLineBorder(Color.red));
-            }
-            if (VALIDATE_FIRSTNAME.find()) {
-                client.setPrenom(firstname.getText());
-                firstname.setBorder(BorderFactory.createLineBorder(Color.gray));
-            } else {
-                cpt_error++;
-                firstname.setBorder(BorderFactory.createLineBorder(Color.red));
-            }
-            if (VALIDATE_CITY.find()) {
-                client.setVille(city.getText());
-                city.setBorder(BorderFactory.createLineBorder(Color.gray));
-            } else {
-                cpt_error++;
-                city.setBorder(BorderFactory.createLineBorder(Color.red));
-            }
             if (cpt_error == 0) {
                 // Je récupère l'id dans la ligne sélectionnée
                 client.setId(model_jtable.clients_list.get(num_ligne()).getId());

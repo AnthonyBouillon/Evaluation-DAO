@@ -18,21 +18,15 @@ public class ClientDAO extends Connexion {
      * Insertion d'un client (nom, prénom et ville) dans la bdd
      *
      * @param cli Contient toutes les données pour un client
+     * @throws java.sql.SQLException
      */
-    public void Create(Client cli) {
-        try {
-            PreparedStatement stm = Connection().prepareStatement("INSERT INTO client (cli_nom, cli_prenom, cli_ville) VALUES (?, ?, ?)");
-            stm.setString(1, cli.getNom());
-            stm.setString(2, cli.getPrenom());
-            stm.setString(3, cli.getVille());
-            stm.execute();
-            Connection().close();
-            message = "Client ajouté avec succès";
-        } catch (SQLException e) {
-            message = "Désolé, le client n'a pas pu être ajouté";
-            System.out.println("Error while inserting entity 'client'");
-            System.out.println(e.getMessage());
-        }
+    public void Create(Client cli) throws SQLException {
+        PreparedStatement stm = Connection().prepareStatement("INSERT INTO client (cli_nom, cli_prenom, cli_ville) VALUES (?, ?, ?)");
+        stm.setString(1, cli.getNom());
+        stm.setString(2, cli.getPrenom());
+        stm.setString(3, cli.getVille());
+        stm.execute();
+        Connection().close();
     }
 
     /**
