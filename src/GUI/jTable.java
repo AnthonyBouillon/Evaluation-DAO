@@ -2,6 +2,7 @@ package GUI;
 
 import DAL.Client;
 import DAL.ClientDAO;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -15,17 +16,21 @@ public class jTable extends AbstractTableModel {
 
     // Entête du tableau qui ne peut être modifié(final) même dans la classe(private) 
     private final String[] Titres = {"NOM", "PRENOM", "VILLE"};
-    ClientDAO clients = new ClientDAO();
+    ClientDAO clients;
     List<Client> clients_list = new ArrayList();
 
     /**
      * Méthode qui récupère la liste qui a été retourné dans la méthode
      * {@code Insert()} de la classe {@code ClientDAO()}
      *
+     * @throws java.sql.SQLException
      * @Construct
      */
-    public jTable() {
+    public jTable() throws SQLException {
+        this.clients = new ClientDAO();
+        this.clients_list = new ArrayList();
         clients_list = clients.Read();
+
     }
 
     /**
@@ -87,8 +92,7 @@ public class jTable extends AbstractTableModel {
      * @param client Contient les données du client
      */
     public void AjouteClient(Client client) {
-        clients_list.add(client);
-        fireTableRowsInserted(clients_list.size()-1, clients_list.size());
+        fireTableRowsInserted(clients_list.size() - 1, clients_list.size());
     }
 
     /**
@@ -97,8 +101,6 @@ public class jTable extends AbstractTableModel {
      * @param i Contient le numéro de la ligne à supprimer
      */
     public void SupprimerClient(int i) {
-        clients_list.remove(i);
-        // Supprime une ligne (Nul besoin de la fonction Actualise()
         fireTableRowsDeleted(i, i);
     }
 
@@ -106,8 +108,10 @@ public class jTable extends AbstractTableModel {
      * Actualise la liste de la jTable, en réassignant la liste retourné de la
      * méthode {@code Insert()} de la classe {@code ClientDAO()} dans la
      * nouvelle liste
+     *
+     * @throws java.sql.SQLException
      */
-    public void Actualise() {
+    public void Actualise() throws SQLException {
         clients_list = clients.Read();
     }
 }

@@ -6,6 +6,7 @@
 import DAL.Connexion;
 import DAL.Client;
 import DAL.ClientDAO;
+import GUI.jTable;
 import java.sql.*;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -16,13 +17,24 @@ import static org.junit.Assert.*;
  */
 public class Test_crud {
 
-    Connexion connection = new Connexion();
-    ClientDAO clients = new ClientDAO();
-    Client cli = new Client();
+    Connexion connection;
+    ClientDAO clients;
+    Client cli;
+    jTable jtable;
+
+    // Instance de mes quatres classes
+    public Test_crud() throws SQLException {
+        this.jtable = new jTable();
+        this.connection = new Connexion();
+        this.clients = new ClientDAO();
+        this.cli = new Client();
+    }
 
     /**
      * Méthode qui me permet de tester la méthode {@code Create()} de la classe
      * {@code ClientDAO()}.
+     *
+     * @throws java.sql.SQLException
      */
     @Test
     public void Create_test() throws SQLException {
@@ -43,9 +55,11 @@ public class Test_crud {
      * Méthode qui me permet de tester la méthode {@code Read()} de la classe
      * {@code ClientDAO()}. Si la liste contient au moins une ligne, c'est que
      * la liste contient des valeurs provenant de la base de données
+     *
+     * @throws java.sql.SQLException
      */
     @Test
-    public void Read_test() {
+    public void Read_test() throws SQLException {
         boolean resultat_attendu = false;
         for (int i = 0; i < clients.Read().size(); i++) {
             if (i > 0) {
@@ -56,11 +70,48 @@ public class Test_crud {
     }
 
     /**
-     * Méthode qui me permet de tester la méthode {@code Update()} de la classe
-     * {@code ClientDAO()}. Modifie les données d'un client (Nom, Prénom, Ville)
+     * Vérifie si le nombre de ligne de la première liste est le même que celui
+     * de la deuxième liste
+     *
+     * @throws SQLException
      */
     @Test
-    public void update_test() {
+    public void Read_test_2() throws SQLException {
+        boolean resultat_attendu = false;
+        if (clients.Read().size() == jtable.getRowCount()) {
+            resultat_attendu = true;
+        }
+        assertTrue(resultat_attendu);
+    }
+
+    /**
+     * Vérifie si le dernier id de la liste correspond au dernier id de la table
+     * client
+     *
+     * @throws SQLException
+     */
+    @Test
+    public void Read_test_3() throws SQLException {
+        boolean resultat_attendu = false;
+        Statement stm = connection.Connection().createStatement();
+        ResultSet result = stm.executeQuery("SELECT MAX(cli_id) as cli_id FROM client");
+        while (result.next()) {
+            cli.setId(result.getInt("cli_id"));
+        }
+        if (cli.getId() == clients.Read().get(clients.Read().size() - 1).getId()) {
+            resultat_attendu = true;
+        }
+        assertTrue(resultat_attendu);
+    }
+
+    /**
+     * Méthode qui me permet de tester la méthode {@code Update()} de la classe
+     * {@code ClientDAO()}. Modifie les données d'un client (Nom, Prénom, Ville)
+     *
+     * @throws java.sql.SQLException
+     */
+    @Test
+    public void update_test() throws SQLException {
         boolean resultat_attendu = false;
         cli.setId(292);
         cli.setNom("Jean mis");
@@ -72,26 +123,10 @@ public class Test_crud {
     }
 
     /**
-     * On teste si la méthode {@code Update()} accepte de ne modifier qu'une
-     * données sans avoir les autres (le résultat attendu doit être faux)
-     *
-     * @return false
-     */
-    @Test
-    public void update_test_2() {
-        boolean resultat_attendu = false;
-        cli.setId(292);
-        cli.setVille("Mouchille");
-        clients.Update(cli);
-        resultat_attendu = clients.validate_method != false;
-        assertFalse(resultat_attendu);
-    }
-
-    /**
      * Méthode Qui me permet de testé la méthode {@code Delete()} de la classe
      * {@code ClientDAO()} qui supprime un client de la base de données
      *
-     * @throws Exception
+     * @throws java.sql.SQLException
      */
     @Test
     public void Delete_test() throws SQLException {
@@ -113,8 +148,14 @@ public class Test_crud {
         assertTrue(resultat_attendu);
     }
 
+    /**
+     * Méthode qui me permet de tester si la connexion à la base de données
+     * fonctionne
+     *
+     * @throws SQLException
+     */
     @Test
-    public void Connection_test() {
-
+    public void Connection_test() throws SQLException {
+        connection.Connection();
     }
 }

@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import javax.swing.BorderFactory;
 import java.util.regex.Pattern;
-import javax.swing.JOptionPane;
 
 /**
  * Formulaire qui permet la gestion de 1 ou N client Ajouter, Modifier,
@@ -23,30 +22,30 @@ import javax.swing.JOptionPane;
  * @author 80010-37-15
  */
 public class InterfaceClient extends javax.swing.JFrame {
-
-    String message = "";
-    // Défini si l'utilisateur veut ajouter ou modifier un client
-    boolean add_button = false;
     // Instance de mes trois classes
-    Client client = new Client();
-    ClientDAO clients = new ClientDAO();
-    jTable model_jtable = new jTable();
+    Client client;
+    ClientDAO clients;
+    jTable model_jtable;
+    // Message de succès ou d'échec
+    String message = "";
+    // Correspond au trois boutons (Ajouter, Modifier, Supprimer)
+    int choice;
+
 
     /**
      * Creates new form InterfaceClient
+     *
+     * @throws java.sql.SQLException
      */
-    public InterfaceClient() {
+    public InterfaceClient() throws SQLException {
         initComponents();
+        this.model_jtable = new jTable();
+        this.clients = new ClientDAO();
+        this.client = new Client();
         // Défini une taille à l'ouverture de l'application
         setSize(595, 550);
-        /*
-         * Affiche les clients dans le tableau.
-         * Affiche une erreur si il y a un problème avec la liste
-         */
-        List_client.setModel(model_jtable);
-        if (clients.message == null) {
-            JOptionPane.showMessageDialog(null, "Désolé, la liste des clients est indisponible");
-        }
+        // Affiche les clients dans le tableau.
+        Array_client.setModel(model_jtable);
     }
 
     /**
@@ -75,7 +74,7 @@ public class InterfaceClient extends javax.swing.JFrame {
         firstname = new javax.swing.JTextField();
         name = new javax.swing.JTextField();
         jScrollPane3 = new javax.swing.JScrollPane();
-        List_client = new javax.swing.JTable();
+        Array_client = new javax.swing.JTable();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -111,16 +110,6 @@ public class InterfaceClient extends javax.swing.JFrame {
         Update_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 Update_buttonActionPerformed(evt);
-            }
-        });
-
-        text_error.addAncestorListener(new javax.swing.event.AncestorListener() {
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
-            }
-            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
-                text_errorAncestorAdded(evt);
-            }
-            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
             }
         });
 
@@ -220,7 +209,7 @@ public class InterfaceClient extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        List_client.setModel(new javax.swing.table.DefaultTableModel(
+        Array_client.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -231,8 +220,8 @@ public class InterfaceClient extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        List_client.setColumnSelectionAllowed(true);
-        jScrollPane3.setViewportView(List_client);
+        Array_client.setColumnSelectionAllowed(true);
+        jScrollPane3.setViewportView(Array_client);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -265,7 +254,6 @@ public class InterfaceClient extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void OK_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OK_buttonActionPerformed
-
         int cpt_error = 0;
         // Expression régulière Alphabet + accent + espace + tiret + limite de 1 à 50
         Pattern PATTERN = Pattern.compile("^[A-Za-záàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ-]+{1,50}$");
@@ -298,105 +286,87 @@ public class InterfaceClient extends javax.swing.JFrame {
             cpt_error++;
             city.setBorder(BorderFactory.createLineBorder(Color.red));
         }
-        // Si l'utilisateur à cliquer precedemment sur le bouton Ajouter / Sinon c'est le bouton modifier
-        if (add_button == true) {
-            if (cpt_error == 0) {
+        // Suivant le bouton choisi (Ajouter, Modifier, Supprimer)
+        switch (choice) {
+            case 1:
+                // AJOUTE UN CLIENT
+                if (cpt_error == 0) {
+                    try {
+                        clients.Create(client);
+                        model_jtable.AjouteClient(client);
+                        model_jtable.Actualise();
+                        empty_field();
+                        setSize(595, 550);
+                        // Affiche message dans le label
+                        text_error.setText(clients.message);
+                    } catch (SQLException ex) {
+                        ex.getErrorCode();
+                        message = "Une erreur est survenue lors de l'ajout du client";
+                        text_error.setText(message);
+                    }
+                }
+                break;
+            case 2:
+                // MODIFIE UN CLIENT
+                if (cpt_error == 0) {
+                    // Je récupère l'id dans la ligne sélectionnée
+                    client.setId(model_jtable.clients_list.get(num_ligne()).getId());
+                    try {
+                        clients.Update(client);
+                        model_jtable.Actualise();
+                        empty_field();
+                        setSize(595, 550);
+                        // Affiche message dans le label
+                        text_error.setText(clients.message);
+                    } catch (SQLException ex) {
+                        ex.getErrorCode();
+                        message = "Une erreur est survenue lors de la modification du client";
+                        text_error.setText(message);
+                    }
+                }
+                break;
+            case 3:
+                // SUPPRIME UN CLIENT
+                client.setId(model_jtable.clients_list.get(num_ligne()).getId());
                 try {
-                    clients.Create(client);
-                    message = "Client ajouté avec succès";
-                    text_error.setText(message);
+                    clients.Delete(client);
+                    model_jtable.SupprimerClient(num_ligne());
+                    model_jtable.Actualise();
+                    empty_field();
+                    setSize(595, 550);
+                    text_error.setText(clients.message);
                 } catch (SQLException ex) {
                     ex.getErrorCode();
-                    message = "Désolé, le client n'a pas pu être ajouté";
+                    message = "Une erreur est survenue lors de la suppression du client";
                     text_error.setText(message);
                 }
-                model_jtable.AjouteClient(client);
-                model_jtable.Actualise();
-                // Puis, je vide les champs
-                empty_field();
-                // Redefini la taille
-                setSize(595, 550);
-                add_button = false;
-                // Affiche message de succès
-               
-            }
-        } else {
-            if (cpt_error == 0) {
-                // Je récupère l'id dans la ligne sélectionnée
-                client.setId(model_jtable.clients_list.get(num_ligne()).getId());
-                /**
-                 * Modifie les infos client dans la base de données Actualise la
-                 * liste de client dans la jTable
-                 */
-                clients.Update(client);
-                model_jtable.Actualise();
-                // Et, je vide les champs
-                empty_field();
-                // Redefini la taille
-                setSize(595, 550);
-                // Affiche message de succès
-                text_error.setText(clients.message);
-            }
+                break;
+            default:
+                break;
         }
     }//GEN-LAST:event_OK_buttonActionPerformed
 
     private void Cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Cancel_buttonActionPerformed
         text_error.setText("");
-        /*
-         * Definition de la taille
-         * Vide les champs de texte
-         * Bouton Ajouter à false
-         */
         setSize(595, 550);
-        add_button = false;
         empty_field();
     }//GEN-LAST:event_Cancel_buttonActionPerformed
 
     private void Update_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Update_buttonActionPerformed
-        add_button = false;
-        /**
-         * Affiche dans les champs les données du client sélectionné Si aucune
-         * ligne n'est sélectionné, affiche un message d'erreur
-         */
-        if (num_ligne() != -1) {
-            setSize(987, 550);
-            text_error.setText("");
-            // Affiche les informations du client dans les champs de texte
-            name.setText(model_jtable.clients_list.get(num_ligne()).getNom());
-            firstname.setText(model_jtable.clients_list.get(num_ligne()).getPrenom());
-            city.setText(model_jtable.clients_list.get(num_ligne()).getVille());
-        } else {
-            text_error.setText("<html><marquee>Veuillez sélectionner un client <br/>avant de le modifier</marquee><hr/><center style='max-width: 10%;'><img src='https://s1.qwant.com/thumbr/0x0/8/0/72200c66d4f5f8505e2fd07b6300796fcf361232b24696275eaffd63d59502/desventajas.png?u=https%3A%2F%2Fdatadesk.es%2Fwp-content%2Fuploads%2F2015%2F08%2Fdesventajas.png&q=0&b=1&p=0&a=1' style='max-width: 10%;'></center></html>");
-        }
+        choice = 2;
+        show_data_field();
     }//GEN-LAST:event_Update_buttonActionPerformed
 
     private void Add_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Add_buttonActionPerformed
+        choice = 1;
         text_error.setText("");
-        add_button = true;
         setSize(987, 550);
     }//GEN-LAST:event_Add_buttonActionPerformed
 
     private void Delete_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Delete_buttonActionPerformed
-        add_button = false;
-        /**
-         * Vérification de la ligne sélectionnée Récupération de l'identifiant
-         * du client Appelle de la méthode DELETE() pour supprimer le client
-         * dans la bdd Appelle de la méthode SupprimerClient() pour supprimer le
-         * client dans la liste
-         */
-        if (num_ligne() != -1) {
-            client.setId(model_jtable.clients_list.get(num_ligne()).getId());
-            clients.Delete(client);
-            model_jtable.SupprimerClient(num_ligne());
-            text_error.setText(clients.message);
-        } else {
-            text_error.setText("<html><marquee>Veuillez sélectionner un client <br/>avant de le supprimer</marquee><hr/><center style='max-width: 10%;'><img src='https://s1.qwant.com/thumbr/0x0/8/0/72200c66d4f5f8505e2fd07b6300796fcf361232b24696275eaffd63d59502/desventajas.png?u=https%3A%2F%2Fdatadesk.es%2Fwp-content%2Fuploads%2F2015%2F08%2Fdesventajas.png&q=0&b=1&p=0&a=1' style='max-width: 10%;'></center></html>");
-        }
+        choice = 3;
+        show_data_field();
     }//GEN-LAST:event_Delete_buttonActionPerformed
-
-    private void text_errorAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_text_errorAncestorAdded
-        text_error.setForeground(Color.blue);
-    }//GEN-LAST:event_text_errorAncestorAdded
 
     /**
      * Méthode qui me permet de connaitre la ligne que l'utilisateur à
@@ -405,7 +375,7 @@ public class InterfaceClient extends javax.swing.JFrame {
      * @return la ligne sélectionnée
      */
     public int num_ligne() {
-        int ligne = List_client.getSelectedRow();
+        int ligne = Array_client.getSelectedRow();
         return ligne;
     }
 
@@ -416,6 +386,23 @@ public class InterfaceClient extends javax.swing.JFrame {
         name.setText("");
         firstname.setText("");
         city.setText("");
+    }
+
+    /**
+     * Affiche dans les champs les données du client sélectionné Si aucune ligne
+     * n'est sélectionné, affiche un message d'erreur
+     */
+    public void show_data_field() {
+        if (num_ligne() != -1) {
+            setSize(987, 550);
+            text_error.setText("");
+            // Affiche les informations du client dans les champs de texte
+            name.setText(model_jtable.clients_list.get(num_ligne()).getNom());
+            firstname.setText(model_jtable.clients_list.get(num_ligne()).getPrenom());
+            city.setText(model_jtable.clients_list.get(num_ligne()).getVille());
+        } else {
+            text_error.setText("<html><marquee>Veuillez sélectionner un client <br/></marquee><hr/><center style='max-width: 10%;'><img src='https://s1.qwant.com/thumbr/0x0/8/0/72200c66d4f5f8505e2fd07b6300796fcf361232b24696275eaffd63d59502/desventajas.png?u=https%3A%2F%2Fdatadesk.es%2Fwp-content%2Fuploads%2F2015%2F08%2Fdesventajas.png&q=0&b=1&p=0&a=1' style='max-width: 10%;'></center></html>");
+        }
     }
 
     /**
@@ -455,18 +442,20 @@ public class InterfaceClient extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
+        java.awt.EventQueue.invokeLater(() -> {
+            try {
                 new InterfaceClient().setVisible(true);
+            } catch (SQLException ex) {
+                Logger.getLogger(InterfaceClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Add_button;
+    private javax.swing.JTable Array_client;
     private javax.swing.JButton Cancel_button;
     private javax.swing.JButton Delete_button;
-    private javax.swing.JTable List_client;
     private javax.swing.JButton OK_button;
     private javax.swing.JButton Update_button;
     private javax.swing.JTextField city;

@@ -9,8 +9,6 @@ import java.sql.*;
  */
 public class Connexion {
 
-    Connection con = null;
-
     /**
      * Méthode contenant l'url de ma base de données ainsi que les identifiants
      * de connexion
@@ -20,7 +18,7 @@ public class Connexion {
      */
     public Connection Connection() throws SQLException {
         String url = "jdbc:mysql://localhost:3306/hotel";
-        con = DriverManager.getConnection(url, "root", "leqxd777");
+        Connection con = DriverManager.getConnection(url, "root", "leqxd777");
         return con;
     }
 }

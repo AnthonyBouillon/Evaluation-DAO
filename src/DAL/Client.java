@@ -84,9 +84,4 @@ public class Client {
     public void setVille(String Ville) {
         this.Ville = Ville;
     }
-
-    public int size() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 }
